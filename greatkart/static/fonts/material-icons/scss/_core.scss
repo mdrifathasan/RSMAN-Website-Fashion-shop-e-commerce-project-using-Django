@@ -1,0 +1,16 @@
+.#{৳mdi-css-prefix}:before,
+.#{৳mdi-css-prefix}-set {
+	display: inline-block;
+	font-family: ৳mdi-font-name;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	font-stretch: normal;
+	text-rendering: auto; // optimizelegibility throws things off #1094
+	font-size:24px;
+	line-height: .8;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	vertical-align: middle;
+}
+

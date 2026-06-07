@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-check-circle me-2"></i> Payment Successful</h4>
+                </div>
+                <div class="card-body">
+                    <div class="my-4">
+                        <div class="success-icon mb-3">
+                            <i class="fas fa-check-circle text-success" style="font-size: 80px;"></i>
+                        </div>
+                        <h3 class="text-success">Thank You!</h3>
+                        <p class="lead">Your payment has been processed successfully.</p>
+                    </div>
+                    
+                    <div class="payment-details mb-4">
+                        <div class="card border-success">
+                            <div class="card-body">
+                                <h5 class="card-title">Payment Details</h5>
+                                <hr>
+                                <div class="text-start">
+                                    {% if transaction_id %}
+                                    <p><strong>Transaction ID:</strong> <span class="text-muted">{{ transaction_id }}</span></p>
+                                    {% endif %}
+                                    {% if payment_method %}
+                                    <p><strong>Payment Method:</strong> <span class="text-muted">{{ payment_method }}</span></p>
+                                    {% endif %}
+                                    {% if amount %}
+                                    <p><strong>Amount Paid:</strong> <span class="text-muted">৳{{ amount|floatformat:2 }}</span></p>
+                                    {% endif %}
+                                    <p><strong>Status:</strong> <span class="badge bg-success">Completed</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <p class="mb-0"><i class="fas fa-info-circle me-2"></i>You will receive an order confirmation email shortly. Keep your transaction ID for reference.</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'store' %}" class="btn btn-primary btn-lg me-2">
+                            <i class="fas fa-shopping-bag me-2"></i> Continue Shopping
+                        </a>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-user me-2"></i> My Account
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    Need help? <a href="{% url 'contact' %}">Contact our support team</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+{% endblock %}

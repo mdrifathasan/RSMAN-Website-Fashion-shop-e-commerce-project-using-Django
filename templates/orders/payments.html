@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="section-content padding-y bg">
+	<div class="container">
+		<!-- ============================ COMPONENT 1 ================================= -->
+		<h4 class="text-center mb-20">Review Your Order and Make Payment</h4>
+		<div class="row">
+			<aside class="col-lg-8">
+				<div class="card">
+					<h5 class="card-header">Billing Address</h5>
+					<div class="card-body">
+						<p class="card-text mb-0">{{order.full_name}}</p>
+						<p class="card-text mb-0">{{order.full_address}}</p>
+						<p class="card-text mb-0">{{order.city}}, {{order.state}}</p>
+						<p class="card-text mb-0">{{order.country}}</p>
+						<p class="card-text mb-0">{{order.email}}</p>
+						<p class="card-text mb-0">{{order.phone}}</p>
+						{% if order.order_note %}
+						<b>Order Note: </b> {{order.order_note}}
+						{% endif %}
+					</div>
+				</div>
+				<div class="card">
+					<h5 class="card-header">Payment Method</h5>
+					<div class="card-body">
+						<p class="card-text">PayPal</p>
+					</div>
+				</div>
+				<div class="card">
+					<h5 class="card-header">Review Products</h5>
+					<div class="card-body">
+						<table class="table table-borderless table-shopping-cart">
+							<thead class="text-muted">
+								<tr class="small text-uppercase">
+									<th scope="col">Product</th>
+									<th scope="col" width="120">Quantity</th>
+									<th scope="col" width="120">Price</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for cart_item in cart_items %}
+								<tr>
+									<td>
+										<figure class="itemside align-items-center">
+											<div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
+											<figcaption class="info">
+												<a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
+												<p class="text-muted small">
+													{% if cart_item.variations.all %}
+													{% for item in cart_item.variations.all %}
+													{{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
+													{% endfor %}
+													{% endif %}
+												</p>
+											</figcaption>
+										</figure>
+									</td>
+									<td>
+										<label for="">{{cart_item.quantity}}</label>
+									</td>
+									<td>
+										<div class="price-wrap">
+											<var class="price">৳ {{ cart_item.sub_total }}</var>
+											<small class="text-muted"> ৳ {{ cart_item.product.price }} each </small>
+										</div>
+									</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</aside>
+			
+			<aside class="col-lg-4">
+				<div class="card">
+					<div class="card-body">
+						<dl class="dlist-align">
+							<dt>Total price:</dt>
+							<dd class="text-right">৳ {{total}}</dd>
+						</dl>
+						<dl class="dlist-align">
+							<dt>Tax:</dt>
+							<dd class="text-right">৳ {{tax}}</dd>
+						</dl>
+						<dl class="dlist-align">
+							<dt>Grand Total:</dt>
+							<dd class="text-right text-dark b"><strong>৳ {{grand_total}}</strong></dd>
+						</dl>
+						<hr>
+						<p class="text-center mb-3">
+							<img src="{% static './images/misc/payments.png' %}" height="26">
+						</p>
+						
+						<!-- PayPal Button Container -->
+						<div id="paypal-button-container"></div>
+						
+						<!-- Alternative Payment Method (Optional) -->
+						<div class="mt-3 text-center">
+							<a href="{% url 'payment_cancel' %}" class="btn btn-secondary btn-block">
+								Cancel Order
+							</a>
+						</div>
+					</div>
+				</div>
+			</aside>
+		</div>
+	</div>
+</section>
+
+<!-- PayPal SDK -->
+{% if paypal_client_id %}
+<script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=USD"></script>
+{% else %}
+<div class="alert alert-warning text-center">
+	PayPal is not configured. Please contact support.
+</div>
+{% endif %}
+
+<script>
+// Get CSRF token function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Variables
+var amount = "{{ grand_total }}";
+var url = "{% url 'payments' %}";
+var createOrderUrl = "{% url 'create_paypal_order' %}?order_id={{order.order_number}}";
+var csrftoken = getCookie('csrftoken');
+var orderID = "{{order.order_number}}";
+var redirect_url = "{% url 'order_complete' %}";
+var paypalClientId = "{{ paypal_client_id }}";
+
+// Check if PayPal is configured
+if (!paypalClientId) {
+    document.getElementById('paypal-button-container').innerHTML = 
+        '<div class="alert alert-danger">PayPal is not configured. Please contact administrator.</div>';
+} else {
+    // Initialize PayPal Buttons
+    paypal.Buttons({
+        style: {
+            color: 'blue',
+            shape: 'rect',
+            label: 'pay',
+            height: 50,
+            layout: 'vertical'
+        },
+
+        // CREATE ORDER: Use backend API for security
+        createOrder: function(data, actions) {
+            return fetch(createOrderUrl, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                }
+            })
+            .then(function(res) {
+                if (!res.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return res.json();
+            })
+            .then(function(data) {
+                if (data.error) {
+                    console.error('PayPal Error:', data.error);
+                    alert('Error creating PayPal order: ' + data.error);
+                    throw new Error(data.error);
+                }
+                if (data.status === 'test_mode') {
+                    console.log('Test mode: Using test order ID');
+                }
+                return data.orderID;
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                alert('Failed to create order. Please try again.');
+                // Fallback to frontend creation if backend fails
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: amount,
+                            currency_code: 'USD'
+                        }
+                    }]
+                });
+            });
+        },
+
+        // ON APPROVE: Capture payment
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                console.log('Payment captured:', details);
+                
+                // Send payment data to your server
+                return fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body: JSON.stringify({
+                        orderID: orderID,
+                        transID: data.orderID,
+                        payment_method: 'PayPal',
+                        status: details.status,
+                    }),
+                })
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.error) {
+                        alert('Payment failed: ' + data.error);
+                        console.error('Server error:', data.error);
+                    } else {
+                        // Redirect to success page
+                        window.location.href = redirect_url + 
+                            '?order_number=' + data.order_number + 
+                            '&payment_id=' + data.transID;
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error:', error);
+                    alert('Payment processing failed. Please check your order status.');
+                });
+            });
+        },
+
+        // ON ERROR: Handle errors
+        onError: function(err) {
+            console.error('PayPal Error:', err);
+            alert('An error occurred with PayPal. Please try again or use a different payment method.');
+        },
+
+        // ON CANCEL: Handle cancellation
+        onCancel: function(data) {
+            console.log('Payment cancelled:', data);
+            alert('Payment was cancelled. You can try again.');
+        }
+
+    }).render('#paypal-button-container');
+}
+</script>
+
+{% endblock %}

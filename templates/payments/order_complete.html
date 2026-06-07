@@ -1,0 +1,181 @@
+<!-- templates/orders/order_complete.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-check-circle"></i> Order Confirmed Successfully!</h4>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Success Message -->
+                    <div class="alert alert-success mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle fa-2x me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Thank you for your order!</h5>
+                                <p class="mb-0">Your order has been confirmed. You will pay via <strong>Cash on Delivery</strong> when you receive your items.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Order Information</h5>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Order Number:</th>
+                                    <td><strong>#{{ order.order_number }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Order Date:</th>
+                                    <td>{{ order.created_at|date:"F d, Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Payment Method:</th>
+                                    <td>
+                                        <span class="badge" style="background: #28a745; color: white; padding: 5px 10px;">
+                                            <i class="fas fa-truck me-1"></i> Cash on Delivery
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Delivery Partner:</th>
+                                    <td><strong>Patahu Courier</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td><span class="badge bg-info">Confirmed & Processing</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5>Payment Summary</h5>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Subtotal:</th>
+                                    <td>৳{{ subtotal|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tax (5%):</th>
+                                    <td>৳{{ order.tax|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Delivery Charge:</th>
+                                    <td>৳0.00 <small class="text-muted">(included)</small></td>
+                                </tr>
+                                <tr class="table-success">
+                                    <th><strong>Amount to Pay on Delivery:</strong></th>
+                                    <td><strong>৳{{ order.order_total|floatformat:2 }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Payment Status:</th>
+                                    <td><span class="badge bg-warning">Pay When Delivered</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- COD Specific Info -->
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-truck me-2"></i>Cash on Delivery via Patahu Courier</h6>
+                        <p class="mb-0">
+                            <strong>Amount to pay on delivery:</strong> ৳{{ order.order_total|floatformat:2 }}<br>
+                            <strong>Delivery timeframe:</strong> 3-5 business days<br>
+                            <strong>Payment method:</strong> Cash only (exact amount preferred)
+                        </p>
+                    </div>
+                    
+                    <!-- Delivery Instructions -->
+                    <div class="alert alert-light border">
+                        <h6><i class="fas fa-clipboard-check me-2"></i>Delivery Instructions:</h6>
+                        <ul class="mb-0">
+                            <li><strong>Keep the exact amount ready</strong> for the delivery person: <strong>৳{{ order.order_total|floatformat:2 }}</strong></li>
+                            <li><strong>Check your items</strong> carefully before making payment</li>
+                            <li>You'll receive a call from Patahu Courier 1-2 hours before delivery</li>
+                            <li>Delivery person will show ID and wear Patahu Courier uniform</li>
+                            <li>Estimated delivery time: <strong>3-5 business days</strong></li>
+                            <li>For delivery queries, contact: <strong>Patahu Courier Support</strong></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Shipping Address -->
+                    <h5 class="mt-4">Shipping Address</h5>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <p class="mb-1"><strong>{{ order.first_name }} {{ order.last_name }}</strong></p>
+                            <p class="mb-1">{{ order.address_line_1 }}</p>
+                            {% if order.address_line_2 %}
+                            <p class="mb-1">{{ order.address_line_2 }}</p>
+                            {% endif %}
+                            <p class="mb-1">{{ order.city }}, {{ order.state }}, {{ order.country }}</p>
+                            <p class="mb-1"><i class="fas fa-phone"></i> {{ order.phone }}</p>
+                            <p class="mb-0"><i class="fas fa-envelope"></i> {{ order.email }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Ordered Products -->
+                    {% if ordered_products %}
+                    <h5>Ordered Products</h5>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in ordered_products %}
+                                <tr>
+                                    <td>{{ item.product.product_name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>৳{{ item.product_price|floatformat:2 }}</td>
+                                    <td>৳{{ item.product_price|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{% url 'store' %}" class="btn btn-primary me-md-2">
+                            <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                        </a>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-user me-2"></i>View Order in Dashboard
+                        </a>
+                    </div>
+                    
+                    <!-- Order Notes -->
+                    {% if order.order_note %}
+                    <div class="alert alert-light border mt-4">
+                        <h6><i class="fas fa-sticky-note me-2"></i>Order Note:</h6>
+                        <p class="mb-0">{{ order.order_note }}</p>
+                    </div>
+                    {% endif %}
+                    
+                </div>
+                <div class="card-footer text-muted">
+                    <small>
+                        <i class="fas fa-info-circle me-1"></i>
+                        Need help? Contact our support team or Patahu Courier if you have delivery questions.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+{% endblock %}

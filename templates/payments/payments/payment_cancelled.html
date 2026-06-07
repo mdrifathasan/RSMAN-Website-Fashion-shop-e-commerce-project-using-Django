@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Payment Cancelled</h4>
+                </div>
+                <div class="card-body">
+                    <div class="my-4">
+                        <div class="warning-icon mb-3">
+                            <i class="fas fa-exclamation-triangle text-warning" style="font-size: 80px;"></i>
+                        </div>
+                        <h3 class="text-warning">Payment Cancelled</h3>
+                        <p class="lead">You have cancelled the payment process.</p>
+                    </div>
+                    
+                    {% if transaction_id %}
+                    <div class="alert alert-light">
+                        <p class="mb-0"><strong>Transaction ID:</strong> {{ transaction_id }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="alert alert-info">
+                        <p class="mb-0"><i class="fas fa-info-circle me-2"></i>Your order is still in your cart. You can complete the payment anytime.</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'checkout' %}" class="btn btn-primary btn-lg me-2">
+                            <i class="fas fa-credit-card me-2"></i> Complete Payment
+                        </a>
+                        <a href="{% url 'cart' %}" class="btn btn-outline-primary btn-lg me-2">
+                            <i class="fas fa-shopping-cart me-2"></i> View Cart
+                        </a>
+                        <a href="{% url 'store' %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-home me-2"></i> Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+{% endblock %}

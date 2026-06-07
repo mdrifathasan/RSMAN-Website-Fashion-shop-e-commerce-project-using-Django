@@ -1,0 +1,10 @@
+<% extends "admin/base_site.html" %> 
+ 
+<% block branding %> 
+<h1 id="site-name"><a href="^<^% url 'admin:index' ^%^>">GreatKart Administration</a></h1> 
+<% endblock %> 
+ 
+<% block userlinks %> 
+    <a href="^<^% url 'admin:dashboard' ^%^>" style="margin-right: 10px;">  Dashboard</a> 
+    {{ block.super }} 
+<% endblock %> 

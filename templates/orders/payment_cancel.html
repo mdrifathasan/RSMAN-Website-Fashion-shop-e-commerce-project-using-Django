@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container text-center py-5">
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">Payment Cancelled</h4>
+        <p>Your payment was cancelled. No charges were made to your account.</p>
+        <hr>
+        <p class="mb-0">
+            <a href="{% url 'cart' %}" class="btn btn-primary">
+                Return to Cart
+            </a>
+            <a href="{% url 'store' %}" class="btn btn-secondary">
+                Continue Shopping
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}

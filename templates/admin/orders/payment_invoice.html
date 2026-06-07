@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice - Payment #{{ payment.id }}</title>
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            @page {
+                margin: 0.5in;
+            }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .invoice-container {
+            border: 2px solid #ddd;
+            padding: 30px;
+            position: relative;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            margin: 5px 0;
+        }
+        
+        .company-info, .client-info {
+            margin-bottom: 30px;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .invoice-details {
+            margin: 30px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .total-section {
+            margin-top: 30px;
+            text-align: right;
+        }
+        
+        .total-row {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+        
+        .print-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 20px 0;
+        }
+        
+        .print-btn:hover {
+            background: #2980b9;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .invoice-logo {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+        
+        .watermark {
+            position: absolute;
+            opacity: 0.1;
+            font-size: 120px;
+            color: #3498db;
+            transform: rotate(-45deg);
+            top: 40%;
+            left: 10%;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="watermark">INVOICE</div>
+        
+        <div class="no-print" style="text-align: center; margin-bottom: 20px;">
+            <button onclick="window.print()" class="print-btn">
+                🖨️ Print Invoice
+            </button>
+            <button onclick="window.close()" class="print-btn" style="background: #95a5a6;">
+                ✕ Close
+            </button>
+        </div>
+        
+        <div class="header">
+            <h1>INVOICE</h1>
+            <p>Payment ID: <strong>#{{ payment.id }}</strong></p>
+            <p>Date: <strong>{{ payment.created_at|date:"F d, Y" }}</strong></p>
+        </div>
+        
+        <div class="row">
+            <div class="company-info" style="width: 50%; float: left;">
+                <div class="info-box">
+                    <h3>GreatKart Store</h3>
+                    <p>123 E-Commerce Street</p>
+                    <p>Dhaka, Bangladesh</p>
+                    <p>Email: support@greatkart.com</p>
+                    <p>Phone: +880 1234 567890</p>
+                </div>
+            </div>
+            
+            <div class="client-info" style="width: 50%; float: right;">
+                <div class="info-box">
+                    <h3>Bill To:</h3>
+                    {% if payment.user %}
+                        <p><strong>{{ payment.user.full_name|default:payment.user.username }}</strong></p>
+                        <p>Email: {{ payment.user.email }}</p>
+                        <p>Phone: {{ payment.user.phone_number|default:"N/A" }}</p>
+                    {% else %}
+                        <p>Guest Customer</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+        
+        <div class="invoice-details">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Order ID</th>
+                        <th>Payment Method</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Payment for Order #{{ payment.order.id|default:"N/A" }}</td>
+                        <td>#{{ payment.order.id|default:"N/A" }}</td>
+                        <td>{{ payment.payment_method|title }}</td>
+                        <td>৳{{ payment.amount_paid|floatformat:2 }}</td>
+                        <td>
+                            <span class="status-badge status-{{ payment.status|lower }}">
+                                {{ payment.status|title }}
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="total-section">
+            <table style="width: 50%; float: right;">
+                <tr>
+                    <td><strong>Subtotal:</strong></td>
+                    <td>৳{{ payment.amount_paid|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Tax (2%):</strong></td>
+                    <td>৳{{ payment.tax|floatformat:2|default:"0.00" }}</td>
+                </tr>
+                <tr class="total-row">
+                    <td><strong>Total Paid:</strong></td>
+                    <td>৳{{ payment.amount_paid|floatformat:2 }}</td>
+                </tr>
+            </table>
+            <div style="clear: both;"></div>
+        </div>
+        
+        <div class="footer">
+            <p>Thank you for your business!</p>
+            <p>Invoice generated on {% now "F d, Y \a\t H:i" %}</p>
+            <p>This is a computer-generated invoice, no signature required.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-print option (uncomment if you want auto-print)
+        // window.onload = function() {
+        //     window.print();
+        // }
+        
+        // After print, close window if needed
+        window.onafterprint = function() {
+            // Optional: auto-close after printing
+            // window.close();
+        };
+    </script>
+</body>
+</html>

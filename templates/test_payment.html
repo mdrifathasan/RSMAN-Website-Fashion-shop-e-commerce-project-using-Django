@@ -1,0 +1,21 @@
+<!-- templates/test_payment.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test bKash Payment</title>
+</head>
+<body>
+    <h1>Testing bKash Flow</h1>
+    <p>Order Number: {{ order.order_number }}</p>
+    <p>Total: £{{ grand_total }}</p>
+    
+    <h2>Debug Info:</h2>
+    <p>Order ID: {{ order.id }}</p>
+    <p>Order Number: {{ order.order_number }}</p>
+    <p>URL Pattern: /payments/{{ order.order_number }}/</p>
+    
+    <a href="/payments/bkash/initiate/{{ order.order_number }}/" style="background: green; color: white; padding: 15px; text-decoration: none;">
+        Test bKash Payment
+    </a>
+</body>
+</html>

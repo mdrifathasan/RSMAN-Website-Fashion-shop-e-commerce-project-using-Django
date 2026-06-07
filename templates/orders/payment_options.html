@@ -1,0 +1,506 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-credit-card"></i> Select Payment Method</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Order Summary -->
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-receipt"></i> Order Summary</h5>
+                        <p class="mb-1"><strong>Order Number:</strong> {{ order.order_number }}</p>
+                        <p class="mb-1"><strong>Total Amount:</strong> ৳{{ order.order_total|floatformat:2 }}</p>
+                        <p class="mb-0"><strong>Items:</strong> {{ order.orderproduct_set.count }} product(s)</p>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Payment Methods -->
+                    <h5 class="mb-4"><i class="fas fa-wallet"></i> Choose Payment Method:</h5>
+                    
+                    <div class="row">
+                        <!-- PayPal -->
+<div class="col-md-6 mb-4">
+    <div class="card h-100 border-primary shadow-sm">
+        <div class="card-body text-center">
+            <div style="color: #003087; font-weight: bold; font-size: 24px; margin-bottom: 15px;">
+                PayPal
+            </div>
+            <p class="text-muted small mb-3">International payments</p>
+            
+            <!-- PayPal Button Container -->
+            <div id="paypal-button-container"></div>
+            
+            <!-- Loading indicator -->
+            <div id="paypal-loading" class="mt-2" style="display: none;">
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <small class="text-muted ml-2">Loading PayPal...</small>
+            </div>
+        </div>
+    </div>
+</div>
+                        
+                        <!-- bKash -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 border-success shadow-sm">
+                                <div class="card-body text-center">
+                                    <div style="background: #e2136e; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                                        <h5 class="mb-0" style="color: white;">bKash</h5>
+                                    </div>
+                                    <p class="text-muted small">Mobile banking (Bangladesh)</p>
+                                    <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#bkashModal">
+                                        <i class="fas fa-mobile-alt"></i> Pay with bKash
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Nagad -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 border-warning shadow-sm">
+                                <div class="card-body text-center">
+                                    <div style="background: #f8a61c; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                                        <h5 class="mb-0" style="color: white;">Nagad</h5>
+                                    </div>
+                                    <p class="text-muted small">Mobile financial service</p>
+                                    <button type="button" class="btn btn-warning btn-block text-white" data-toggle="modal" data-target="#nagadModal">
+                                        <i class="fas fa-money-bill-wave"></i> Pay with Nagad
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cash on Delivery -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 border-secondary shadow-sm">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-box fa-3x text-secondary mb-3"></i>
+                                    <h5>Cash on Delivery</h5>
+                                    <p class="text-muted small">Pay when you receive</p>
+                                    <button type="button" class="btn btn-secondary btn-block" disabled>
+                                        Coming Soon
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'cart' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- bKash Modal -->
+<div class="modal fade" id="bkashModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-mobile-alt"></i> Pay with bKash</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div style="background: #e2136e; color: white; padding: 15px; border-radius: 10px; display: inline-block;">
+                        <h4 class="mb-0" style="color: white;">bKash Payment</h4>
+                    </div>
+                    <p class="mt-3">Enter your bKash mobile number</p>
+                </div>
+                
+                <form id="bkashForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="orderNumber" value="{{ order.order_number }}">
+                    
+                    <div class="form-group">
+                        <label for="bkashMobile"><i class="fas fa-phone"></i> bKash Mobile Number</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">+880</span>
+                            </div>
+                            <input type="text" class="form-control" id="bkashMobile" 
+                                   placeholder="1XXXXXXXXXX" pattern="1[3-9]\d{8}" required
+                                   title="Enter 11-digit bKash number">
+                        </div>
+                        <small class="form-text text-muted">Example: 1712345678 (11 digits without +880)</small>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Demo Mode:</strong> This simulates bKash payment. In real implementation, you'd receive payment request.
+                    </div>
+                </form>
+                
+                <div id="bkashStatus" class="mt-3" style="display: none;">
+                    <div class="alert alert-info" id="bkashAlert">
+                        <i class="fas fa-spinner fa-spin" id="bkashSpinner"></i>
+                        <span id="bkashMessage">Processing payment...</span>
+                    </div>
+                    <div class="text-center">
+                        <button id="bkashCheckBtn" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-sync-alt"></i> Check Payment Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="bkashSubmit">
+                    <i class="fas fa-paper-plane"></i> Send Payment Request
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Nagad Modal -->
+<div class="modal fade" id="nagadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-money-bill-wave"></i> Pay with Nagad</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div style="background: #f8a61c; color: white; padding: 15px; border-radius: 10px; display: inline-block;">
+                        <h4 class="mb-0" style="color: white;">Nagad Payment</h4>
+                    </div>
+                    <p class="mt-3">Enter your Nagad mobile number</p>
+                </div>
+                
+                <form id="nagadForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="nagadOrderNumber" value="{{ order.order_number }}">
+                    
+                    <div class="form-group">
+                        <label for="nagadMobile"><i class="fas fa-phone"></i> Nagad Mobile Number</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">+880</span>
+                            </div>
+                            <input type="text" class="form-control" id="nagadMobile" 
+                                   placeholder="1XXXXXXXXXX" pattern="1[3-9]\d{8}" required
+                                   title="Enter 11-digit Nagad number">
+                        </div>
+                        <small class="form-text text-muted">Example: 1712345678 (11 digits without +880)</small>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Demo Mode:</strong> This simulates Nagad payment. In real implementation, you'd receive payment request.
+                    </div>
+                </form>
+                
+                <div id="nagadStatus" class="mt-3" style="display: none;">
+                    <div class="alert alert-info" id="nagadAlert">
+                        <i class="fas fa-spinner fa-spin" id="nagadSpinner"></i>
+                        <span id="nagadMessage">Processing payment...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+             
+             <!-- PayPal SDK -->
+
+{% if paypal_client_id %}
+<script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=USD"></script>
+<script>
+// PayPal Integration
+document.addEventListener('DOMContentLoaded', function() {
+    const orderID = "{{ order.order_number }}";
+    const orderTotal = "{{ order.order_total|floatformat:2 }}";
+    
+    if (typeof paypal !== 'undefined') {
+        paypal.Buttons({
+            style: {
+                color: 'blue',
+                shape: 'rect',
+                label: 'pay',
+                height: 40,
+                layout: 'vertical'
+            },
+
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: orderTotal,
+                            currency_code: 'USD'
+                        },
+                        description: 'Order #' + orderID,
+                        custom_id: orderID
+                    }]
+                });
+            },
+
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    // Get CSRF token
+                    function getCookie(name) {
+                        let cookieValue = null;
+                        if (document.cookie && document.cookie !== '') {
+                            const cookies = document.cookie.split(';');
+                            for (let i = 0; i < cookies.length; i++) {
+                                const cookie = cookies[i].trim();
+                                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                    break;
+                                }
+                            }
+                        }
+                        return cookieValue;
+                    }
+                    
+                    const csrftoken = getCookie('csrftoken');
+                    
+                    // Send to backend
+                    return fetch('/orders/payments/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken,
+                        },
+                        body: JSON.stringify({
+                            orderID: orderID,
+                            transID: data.orderID,
+                            payment_method: 'PayPal',
+                            status: details.status,
+                        }),
+                    })
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(result) {
+                        if (result.error) {
+                            alert('Payment failed: ' + result.error);
+                        } else {
+                            window.location.href = '/orders/order_complete/?order_number=' + 
+                                result.order_number + '&payment_id=' + result.transID;
+                        }
+                    });
+                });
+            },
+
+            onError: function(err) {
+                console.error('PayPal Error:', err);
+                alert('PayPal error: ' + err.message);
+            }
+
+        }).render('#paypal-button-container');
+    } else {
+        document.getElementById('paypal-button-container').innerHTML = 
+            '<div class="alert alert-danger">PayPal failed to load. Please refresh.</div>';
+    }
+});
+</script>
+{% else %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('paypal-button-container').innerHTML = 
+        '<div class="alert alert-warning">PayPal is not configured.</div>';
+});
+</script>
+{% endif %}
+   <button type="button" class="btn btn-warning text-white" id="nagadSubmit">
+                    <i class="fas fa-paper-plane"></i> Send Payment Request
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+// Get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+// bKash Payment
+৳('#bkashSubmit').click(function() {
+    const mobile = ৳('#bkashMobile').val().trim();
+    const orderNumber = ৳('#orderNumber').val();
+    
+    // Validate mobile number
+    if (!mobile.match(/^1[3-9]\d{8}৳/)) {
+        alert('Please enter a valid Bangladeshi mobile number (11 digits starting with 1)');
+        return;
+    }
+    
+    // Show status
+    ৳('#bkashStatus').show();
+    ৳('#bkashAlert').removeClass('alert-success alert-danger').addClass('alert-info');
+    ৳('#bkashMessage').html('<i class="fas fa-spinner fa-spin"></i> Sending payment request to bKash...');
+    ৳('#bkashSubmit').prop('disabled', true);
+    
+    // Send request
+    ৳.ajax({
+        url: "{% url 'initiate_bkash_payment' %}",
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            order_number: orderNumber,
+            mobile_number: mobile
+        }),
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        success: function(response) {
+            if (response.success) {
+                ৳('#bkashAlert').removeClass('alert-info').addClass('alert-success');
+                ৳('#bkashMessage').html('<i class="fas fa-check-circle"></i> ' + response.message);
+                ৳('#bkashCheckBtn').show();
+                
+                // Store payment ID for verification
+                ৳('#bkashCheckBtn').data('payment-id', response.payment_id);
+                ৳('#bkashCheckBtn').data('gateway', 'bKash');
+                
+                // Auto-check after 2 seconds
+                setTimeout(function() {
+                    checkPaymentStatus(response.payment_id, 'bKash');
+                }, 2000);
+                
+            } else {
+                ৳('#bkashAlert').removeClass('alert-info').addClass('alert-danger');
+                ৳('#bkashMessage').html('<i class="fas fa-exclamation-circle"></i> Error: ' + response.error);
+                ৳('#bkashSubmit').prop('disabled', false);
+            }
+        },
+        error: function() {
+            ৳('#bkashAlert').removeClass('alert-info').addClass('alert-danger');
+            ৳('#bkashMessage').html('<i class="fas fa-exclamation-circle"></i> Server error. Please try again.');
+            ৳('#bkashSubmit').prop('disabled', false);
+        }
+    });
+});
+
+// Nagad Payment
+৳('#nagadSubmit').click(function() {
+    const mobile = ৳('#nagadMobile').val().trim();
+    const orderNumber = ৳('#nagadOrderNumber').val();
+    
+    // Validate mobile number
+    if (!mobile.match(/^1[3-9]\d{8}৳/)) {
+        alert('Please enter a valid Bangladeshi mobile number (11 digits starting with 1)');
+        return;
+    }
+    
+    // Show status
+    ৳('#nagadStatus').show();
+    ৳('#nagadAlert').removeClass('alert-success alert-danger').addClass('alert-info');
+    ৳('#nagadMessage').html('<i class="fas fa-spinner fa-spin"></i> Sending payment request to Nagad...');
+    ৳('#nagadSubmit').prop('disabled', true);
+    
+    // Send request
+    ৳.ajax({
+        url: "{% url 'initiate_nagad_payment' %}",
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            order_number: orderNumber,
+            mobile_number: mobile
+        }),
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        success: function(response) {
+            if (response.success) {
+                ৳('#nagadAlert').removeClass('alert-info').addClass('alert-success');
+                ৳('#nagadMessage').html('<i class="fas fa-check-circle"></i> ' + response.message);
+                
+                // Auto-check after 2 seconds
+                setTimeout(function() {
+                    checkPaymentStatus(response.payment_id, 'Nagad');
+                }, 2000);
+                
+            } else {
+                ৳('#nagadAlert').removeClass('alert-info').addClass('alert-danger');
+                ৳('#nagadMessage').html('<i class="fas fa-exclamation-circle"></i> Error: ' + response.error);
+                ৳('#nagadSubmit').prop('disabled', false);
+            }
+        },
+        error: function() {
+            ৳('#nagadAlert').removeClass('alert-info').addClass('alert-danger');
+            ৳('#nagadMessage').html('<i class="fas fa-exclamation-circle"></i> Server error. Please try again.');
+            ৳('#nagadSubmit').prop('disabled', false);
+        }
+    });
+});
+
+// Check Payment Status
+৳('#bkashCheckBtn').click(function() {
+    const paymentId = ৳(this).data('payment-id');
+    const gateway = ৳(this).data('gateway');
+    checkPaymentStatus(paymentId, gateway);
+});
+
+function checkPaymentStatus(paymentId, gateway) {
+    ৳.ajax({
+        url: "{% url 'verify_payment' %}",
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            payment_id: paymentId,
+            gateway: gateway
+        }),
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        success: function(response) {
+            if (response.success) {
+                // Success - redirect to order complete
+                alert('Payment successful! Redirecting to order confirmation...');
+                window.location.href = "{% url 'order_complete' %}?order_number=" + 
+                    response.order_number + "&payment_id=" + response.payment_id;
+            } else {
+                // Show error
+                if (gateway === 'bKash') {
+                    ৳('#bkashMessage').html('<i class="fas fa-exclamation-circle"></i> ' + response.error);
+                    ৳('#bkashSubmit').prop('disabled', false);
+                } else {
+                    ৳('#nagadMessage').html('<i class="fas fa-exclamation-circle"></i> ' + response.error);
+                    ৳('#nagadSubmit').prop('disabled', false);
+                }
+            }
+        },
+        error: function() {
+            if (gateway === 'bKash') {
+                ৳('#bkashMessage').html('<i class="fas fa-exclamation-circle"></i> Error checking status. Please try again.');
+            } else {
+                ৳('#nagadMessage').html('<i class="fas fa-exclamation-circle"></i> Error checking status. Please try again.');
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
