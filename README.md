@@ -3,7 +3,7 @@
 # About The Project
 A Django-based fashion e-commerce architecture named fashion-shop-e-comm (built from an source branch like iterce-project-using-django-main or similar modular setups) uses Python's high-level framework to build a secure, highly scalable, and custom database-driven shopping experience.By breaking down the standard architectural blueprint for this specific type of project, you can see how it handles database design, features, and app modularity.
 
-<img src="https://github.com/dev-rathankumar/greatkart-pre-deploy/blob/main/media/greatkart-screenshot.jpg">
+<img src="https://github.com/dev-rathankumar/greatkart-pre-deploy/blob/main/media/2. greatkart-screenshot.jpg">
 
 # Setup Instructions
 
